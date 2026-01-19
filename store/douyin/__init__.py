@@ -183,7 +183,7 @@ async def update_douyin_aweme(aweme_item: Dict):
         "note_download_url": ",".join(_extract_note_image_list(aweme_item)),
         "source_keyword": source_keyword_var.get(),
     }
-    utils.logger.info(f"[store.douyin.update_douyin_aweme] douyin aweme id:{aweme_id}, title:{save_content_item.get('title')}")
+    utils.logger.info(f"[store.douyin.update_douyin_aweme] douyin aweme id:{aweme_id}, title:{save_content_item.get('title')}，ip:{save_content_item.get('ip_location')}")
     await DouyinStoreFactory.create_store().store_content(content_item=save_content_item)
 
 
@@ -191,7 +191,10 @@ async def batch_update_dy_aweme_comments(aweme_id: str, comments: List[Dict]):
     if not comments:
         return
     for comment_item in comments:
-        await update_dy_aweme_comment(aweme_id, comment_item)
+        utils.logger.info(f"开始操作，评论创建时间：{comment_item.get('create_time')}, IP标签：{comment_item.get('ip_label','')}")
+        if comment_item.get("create_time") > config.CRAWLER_MIN_TIME and comment_item.get("ip_label", "") == config.CRAWLER_DONE:
+            utils.logger.info("成功进入")
+            await update_dy_aweme_comment(aweme_id, comment_item)
 
 
 async def update_dy_aweme_comment(aweme_id: str, comment_item: Dict):
@@ -222,7 +225,7 @@ async def update_dy_aweme_comment(aweme_id: str, comment_item: Dict):
         "parent_comment_id": parent_comment_id,
         "pictures": ",".join(_extract_comment_image_list(comment_item)),
     }
-    utils.logger.info(f"[store.douyin.update_dy_aweme_comment] douyin aweme comment: {comment_id}, content: {save_comment_item.get('content')}")
+    utils.logger.info(f"[store.douyin.update_dy_aweme_comment] douyin aweme comment: {comment_id}, content: {save_comment_item.get('content')},ip:{save_comment_item.get('ip_location')}")
 
     await DouyinStoreFactory.create_store().store_comment(comment_item=save_comment_item)
 
