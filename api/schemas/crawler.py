@@ -70,6 +70,8 @@ class CrawlerStartRequest(BaseModel):
     save_option: SaveDataOptionEnum = SaveDataOptionEnum.JSON
     cookies: str = ""
     headless: bool = False
+    min_time: str = ""  # Format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS
+    ip_location: str = ""  # IP location filter
 
 
 class CrawlerStatusResponse(BaseModel):

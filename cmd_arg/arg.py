@@ -250,6 +250,22 @@ async def parse_cmd(argv: Optional[Sequence[str]] = None):
                 rich_help_panel="Basic Configuration",
             ),
         ] = "",
+        min_time: Annotated[
+            str,
+            typer.Option(
+                "--min_time",
+                help="Minimum time for crawling comments (format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS), empty means no filter",
+                rich_help_panel="Filter Configuration",
+            ),
+        ] = config.CRAWLER_MIN_TIME,
+        ip_location: Annotated[
+            str,
+            typer.Option(
+                "--ip_location",
+                help="IP location filter for comments, empty string means no filter",
+                rich_help_panel="Filter Configuration",
+            ),
+        ] = config.CRAWLER_IP_LOCATION,
     ) -> SimpleNamespace:
         """MediaCrawler 命令行入口"""
 
@@ -299,6 +315,10 @@ async def parse_cmd(argv: Optional[Sequence[str]] = None):
                 config.WEIBO_CREATOR_ID_LIST = creator_id_list
             elif platform == PlatformEnum.KUAISHOU:
                 config.KS_CREATOR_ID_LIST = creator_id_list
+
+        # Set filter parameters
+        config.CRAWLER_MIN_TIME = min_time
+        config.CRAWLER_IP_LOCATION = ip_location
 
         return SimpleNamespace(
             platform=config.PLATFORM,

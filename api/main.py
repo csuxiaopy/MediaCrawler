@@ -39,7 +39,11 @@ app = FastAPI(
 )
 
 # Get webui static files directory
-WEBUI_DIR = os.path.join(os.path.dirname(__file__), "webui")
+# Check new location first (project root), then fall back to old bundled location
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+NEW_WEBUI_DIR = os.path.join(PROJECT_ROOT, "webui")
+OLD_WEBUI_DIR = os.path.join(os.path.dirname(__file__), "webui")
+WEBUI_DIR = NEW_WEBUI_DIR if os.path.exists(os.path.join(NEW_WEBUI_DIR, "index.html")) else OLD_WEBUI_DIR
 
 # CORS configuration - allow frontend dev server access
 app.add_middleware(
@@ -171,14 +175,27 @@ async def get_config_options():
 
 # Mount static resources - must be placed after all routes
 if os.path.exists(WEBUI_DIR):
+    # Mount assets directory (old bundled webui)
     assets_dir = os.path.join(WEBUI_DIR, "assets")
     if os.path.exists(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+    
+    # Mount css directory (new webui)
+    css_dir = os.path.join(WEBUI_DIR, "css")
+    if os.path.exists(css_dir):
+        app.mount("/css", StaticFiles(directory=css_dir), name="css")
+    
+    # Mount js directory (new webui)
+    js_dir = os.path.join(WEBUI_DIR, "js")
+    if os.path.exists(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js")
+    
     # Mount logos directory
     logos_dir = os.path.join(WEBUI_DIR, "logos")
     if os.path.exists(logos_dir):
         app.mount("/logos", StaticFiles(directory=logos_dir), name="logos")
-    # Mount other static files (e.g., vite.svg)
+    
+    # Mount other static files
     app.mount("/static", StaticFiles(directory=WEBUI_DIR), name="webui-static")
 
 

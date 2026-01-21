@@ -187,13 +187,50 @@ async def update_douyin_aweme(aweme_item: Dict):
     await DouyinStoreFactory.create_store().store_content(content_item=save_content_item)
 
 
+from datetime import datetime
+
+
+def _parse_min_time(time_str: str) -> int:
+    """Parse time string to Unix timestamp.
+    
+    Supports formats:
+    - YYYY-MM-DD
+    - YYYY-MM-DD HH:MM:SS
+    
+    Returns 0 if parsing fails or string is empty.
+    """
+    if not time_str:
+        return 0
+    formats = ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]
+    for fmt in formats:
+        try:
+            return int(datetime.strptime(time_str, fmt).timestamp())
+        except ValueError:
+            continue
+    return 0
+
+
 async def batch_update_dy_aweme_comments(aweme_id: str, comments: List[Dict]):
     if not comments:
         return
+    
+    # Parse min_time once for efficiency
+    min_time_ts = _parse_min_time(config.CRAWLER_MIN_TIME)
+    ip_filter = config.CRAWLER_IP_LOCATION
+    
     for comment_item in comments:
-        utils.logger.info(f"开始操作，评论创建时间：{comment_item.get('create_time')}, IP标签：{comment_item.get('ip_label','')}")
-        if comment_item.get("create_time") > config.CRAWLER_MIN_TIME and comment_item.get("ip_label", "") == config.CRAWLER_DONE:
-            utils.logger.info("成功进入")
+        create_time = comment_item.get("create_time", 0)
+        ip_label = comment_item.get("ip_label", "")
+        
+        utils.logger.info(f"处理评论，创建时间：{create_time}, IP标签：{ip_label}")
+        
+        # Check time filter (0 means no filter)
+        time_ok = min_time_ts == 0 or create_time > min_time_ts
+        # Check IP location filter (empty string means no filter)
+        ip_ok = not ip_filter or ip_label == ip_filter
+        
+        if time_ok and ip_ok:
+            utils.logger.info("评论符合过滤条件，正在保存")
             await update_dy_aweme_comment(aweme_id, comment_item)
 
 

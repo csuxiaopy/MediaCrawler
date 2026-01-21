@@ -230,6 +230,12 @@ class CrawlerManager:
 
         cmd.extend(["--headless", "true" if config.headless else "false"])
 
+        if config.min_time:
+            cmd.extend(["--min_time", config.min_time])
+
+        if config.ip_location:
+            cmd.extend(["--ip_location", config.ip_location])
+
         return cmd
 
     async def _read_output(self):

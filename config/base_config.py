@@ -117,11 +117,11 @@ FONT_PATH = "./docs/STZHONGS.TTF"
 # 爬取间隔时间
 CRAWLER_MAX_SLEEP_SEC = 2
 
-# 爬取最小评论时间
-CRAWLER_MIN_TIME = 1677833600
+# 爬取最小评论时间 (格式: YYYY-MM-DD 或 YYYY-MM-DD HH:MM:SS)，空字符串表示不过滤
+CRAWLER_MIN_TIME = ""
 
-# 爬取的地方
-CRAWLER_DONE = "上海"
+# IP地点过滤，空字符串表示不过滤
+CRAWLER_IP_LOCATION = ""
 
 from .bilibili_config import *
 from .xhs_config import *
